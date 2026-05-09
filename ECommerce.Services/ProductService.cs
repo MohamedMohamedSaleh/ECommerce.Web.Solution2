@@ -2,6 +2,8 @@
 using ECommerce.Domain.Contracts;
 using ECommerce.Domain.Entities.ProductModule;
 using ECommerce.ServiceAbstraction;
+using ECommerce.Services.Specification;
+using ECommerce.Shared;
 using ECommerce.Shared.DTOS.ProductDtos;
 using System;
 using System.Collections.Generic;
@@ -28,10 +30,17 @@ namespace ECommerce.Services
             // Do not forget to create the mapping profile for Brand to BrandDTO in your Mapping profile.
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetAllProductsAsync()
+        public async Task<PaginatedResult<ProductDTO>> GetAllProductsAsync(ProductQueryParams queryParams)
         {
-            var Products = await _unitOfWork.GetRepository<Product, int>().GetAllAsync();
-            return _mapper.Map<IEnumerable<ProductDTO>>(Products);
+            var Spec = new ProductWithBrandAndTypeSpecification(queryParams);
+            var Products = await _unitOfWork.GetRepository<Product, int>().GetAllAsync(Spec);
+
+            var ProductsDTO = _mapper.Map<IEnumerable<ProductDTO>>(Products);
+            var PageCount = ProductsDTO.Count();
+            var CountSpec = new ProductCountSpecification(queryParams);
+            var CountOfProducts = await _unitOfWork.GetRepository<Product, int>().CountAsync(CountSpec);
+            //var hasNext = CountOfProducts > (PageCount + (queryParams.PageIndex - 1) * queryParams.PageSize);
+            return new PaginatedResult<ProductDTO>(queryParams.PageIndex, PageCount, queryParams.PageSize, CountOfProducts, ProductsDTO);
         }
 
         public async Task<IEnumerable<TypeDTO>> GetAllTypesAsync()
@@ -42,7 +51,8 @@ namespace ECommerce.Services
 
         public async Task<ProductDTO?> GetProductByIdAsync(int id)
         {
-            var Product = await _unitOfWork.GetRepository<Product, int>().GetByIdAsync(id);
+            var Spec = new ProductWithBrandAndTypeSpecification(id);
+            var Product = await _unitOfWork.GetRepository<Product, int>().GetByIdAsync(Spec);
             return _mapper.Map<ProductDTO?>(Product);
         }
     }
