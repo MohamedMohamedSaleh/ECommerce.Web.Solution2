@@ -1,4 +1,5 @@
-﻿using ECommerce.ServiceAbstraction;
+﻿using ECommerce.Presentation.Attributes;
+using ECommerce.ServiceAbstraction;
 using ECommerce.Shared;
 using ECommerce.Shared.DTOS.ProductDtos;
 using Microsoft.AspNetCore.Mvc;
@@ -24,9 +25,14 @@ namespace ECommerce.Presentation.Controllers
         #region Get All Products
         // GET: baseurl/api/products?brandId && typeId (controller name is products)
         [HttpGet]
+        [RedisCache]
         public async Task<ActionResult<PaginatedResult<ProductDTO>>> GetAllProducts([FromQuery] ProductQueryParams queryParams)
         {
             var products = await _productService.GetAllProductsAsync(queryParams);
+            if (products == null)
+            {
+                throw new KeyNotFoundException($"Products was not found");
+            }
             return Ok(products);
         }
         #endregion
@@ -36,11 +42,11 @@ namespace ECommerce.Presentation.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDTO>> GetProductById(int id)
         {
+            //throw new Exception();
             var product = await _productService.GetProductByIdAsync(id);
             if (product == null)
             {
-                return NotFound();
-
+                throw new KeyNotFoundException($"Product with id {id} was not found");
             }
             return Ok(product);
         }
@@ -52,6 +58,10 @@ namespace ECommerce.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<BrandDTO>>> GetAllBrands()
         {
             var brands = await _productService.GetAllBrandsAsync();
+            if(brands is null)
+            {
+                throw new KeyNotFoundException();
+            }
             return Ok(brands);
         }
         #endregion
@@ -62,6 +72,10 @@ namespace ECommerce.Presentation.Controllers
         public async Task<ActionResult<IEnumerable<TypeDTO>>> GetAllTypes()
         {
             var types = await _productService.GetAllTypesAsync();
+            if(types is null)
+            {
+                throw new KeyNotFoundException();
+            }
             return Ok(types);
         }
         #endregion

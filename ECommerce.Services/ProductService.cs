@@ -39,7 +39,6 @@ namespace ECommerce.Services
             var PageCount = ProductsDTO.Count();
             var CountSpec = new ProductCountSpecification(queryParams);
             var CountOfProducts = await _unitOfWork.GetRepository<Product, int>().CountAsync(CountSpec);
-            //var hasNext = CountOfProducts > (PageCount + (queryParams.PageIndex - 1) * queryParams.PageSize);
             return new PaginatedResult<ProductDTO>(queryParams.PageIndex, PageCount, queryParams.PageSize, CountOfProducts, ProductsDTO);
         }
 
