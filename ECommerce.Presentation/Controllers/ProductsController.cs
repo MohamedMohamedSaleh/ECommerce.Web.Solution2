@@ -11,9 +11,8 @@ using System.Threading.Tasks;
 
 namespace ECommerce.Presentation.Controllers
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class ProductsController : ControllerBase
+
+    public class ProductsController : ApiBaseController
     {
         private readonly IProductService _productService;
 
@@ -43,12 +42,8 @@ namespace ECommerce.Presentation.Controllers
         public async Task<ActionResult<ProductDTO>> GetProductById(int id)
         {
             //throw new Exception();
-            var product = await _productService.GetProductByIdAsync(id);
-            if (product == null)
-            {
-                throw new KeyNotFoundException($"Product with id {id} was not found");
-            }
-            return Ok(product);
+            var result = await _productService.GetProductByIdAsync(id);
+            return HandleResult(result);
         }
         #endregion
 

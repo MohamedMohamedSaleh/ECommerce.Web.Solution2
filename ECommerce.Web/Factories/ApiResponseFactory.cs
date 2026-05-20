@@ -7,7 +7,7 @@ namespace ECommerce.Web.Factories
         public static IActionResult GenerateApiValidationResponse(ActionContext context)
         {
             var errors = context.ModelState
-                       .Where(x => x.Value.Errors.Count > 0)
+                       .Where(x => x.Value?.Errors.Count > 0)
                        .ToDictionary(
                            kvp => kvp.Key,
                            kvp => kvp.Value?.Errors
@@ -15,7 +15,7 @@ namespace ECommerce.Web.Factories
                                .ToArray()
                        );
 
-            var validationProblemDetails = new ValidationProblemDetails(errors)
+            var validationProblemDetails = new ValidationProblemDetails(errors!)
             {
                 Title = "Validation Error!",
                 Status = StatusCodes.Status400BadRequest,

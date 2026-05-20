@@ -59,11 +59,8 @@ namespace ECommerce.Web
             var app = builder.Build();
 
             #region Data Seed
-
             await app.MigrateDbAsync();
             await app.seedDbAsync();
-
-
             #endregion
 
             app.UseMiddleware<ExceptionHandlerMiddleWare>();
